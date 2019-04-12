@@ -118,12 +118,12 @@ func TestWalletManager_GetAssetsAccountBalance(t *testing.T) {
 
 func TestWalletManager_GetAssetsAccountTokenBalance(t *testing.T) {
 	tm := testInitWalletManager()
-	walletID := "WMTUzB3LWaSKNKEQw9Sn73FjkEoYGHEp4B"
-	accountID := "59t47qyjHUMZ6PGAdjkJopE9ffAPUkdUhSinJqcWRYZ1"
+	walletID := "WCBkGX2YgKuZndqhZxEnuJMWm9w95UcMNx"
+	accountID := "CowQhDKmxb6Jaotkb4V3oqQSb2SCgcGy8819GpGVFLP8"
 
 	contract := openwallet.SmartContract{
-		Address:  "0x4092678e4E78230F46A1534C0fbc8fA39780892B",
-		Symbol:   "ETH",
+		Address:  "0x1cC3150ABc543b62A20694DC16c9E614855A2C40",
+		Symbol:   "TRUE",
 		Name:     "OCoin",
 		Token:    "OCN",
 		Decimals: 18,
@@ -185,5 +185,45 @@ func TestGetAddressBalance(t *testing.T) {
 		log.Infof("balance[%s] = %s", b.Address, b.Balance)
 		log.Infof("UnconfirmBalance[%s] = %s", b.Address, b.UnconfirmBalance)
 		log.Infof("ConfirmBalance[%s] = %s", b.Address, b.ConfirmBalance)
+	}
+}
+
+func TestGetAddressTokenBalance(t *testing.T) {
+	symbol := "TRUE"
+	assetsMgr, err := openw.GetAssetsAdapter(symbol)
+	if err != nil {
+		log.Error(symbol, "is not support")
+		return
+	}
+	//读取配置
+	absFile := filepath.Join(configFilePath, symbol+".ini")
+
+	c, err := config.NewConfig("ini", absFile)
+	if err != nil {
+		return
+	}
+	assetsMgr.LoadAssetsConfig(c)
+	cd := assetsMgr.GetSmartContractDecoder()
+
+	addrs := []string{
+		"0x82e88d3439a24a4603eb25b0b26328a906bc2e4f",
+	}
+
+	contract := openwallet.SmartContract{
+		ContractID: "0x1cC3150ABc543b62A20694DC16c9E614855A2C40",
+		Address:    "0x1cC3150ABc543b62A20694DC16c9E614855A2C40",
+		Symbol:     "true",
+		Name:       "",
+		Token:      "",
+		Decimals:   18,
+	}
+
+	balances, err := cd.GetTokenBalanceByAddress(contract, addrs...)
+	if err != nil {
+		log.Errorf(err.Error())
+		return
+	}
+	for _, b := range balances {
+		log.Infof("balance[%s] = %s", b.Balance.Address, b.Balance.Balance)
 	}
 }
