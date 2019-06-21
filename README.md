@@ -21,4 +21,7 @@ ServerAPI = "http://127.0.0.1:20035"
 #block chain ID
 ChainID = 19330
 
+# Cache data file directory, default = "", current directory: ./data
+dataDir = ""
+
 ```

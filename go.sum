@@ -25,6 +25,8 @@ github.com/blocktree/ethereum-adapter v1.1.0 h1:9PezH2TWSRCBEYF9Hb/cQnAfw7ygxPxJ
 github.com/blocktree/ethereum-adapter v1.1.0/go.mod h1:rzB4pd6WnqSsuaaA0bYpl1cCyJME4oZBk0bOIEV6m3o=
 github.com/blocktree/ethereum-adapter v1.1.2 h1:D8plIL5xKzVRrD3nj8pmSIuu0Jn5HUOsHpvTpf397ao=
 github.com/blocktree/ethereum-adapter v1.1.2/go.mod h1:j628aA6M4k34ew6EGpQvrDbYuHa6NkzxYfMqW/OUlXI=
+github.com/blocktree/ethereum-adapter v1.1.6 h1:wpyJjBA0MIL3zV3vTUKN4GQ+HxGI4LG4IFvZQYGHNuk=
+github.com/blocktree/ethereum-adapter v1.1.6/go.mod h1:j628aA6M4k34ew6EGpQvrDbYuHa6NkzxYfMqW/OUlXI=
 github.com/blocktree/go-owcdrivers v1.0.0 h1:dMxbi+In7On3fq/2cfaO+IdKY35l++4cPFe6jcdJanM=
 github.com/blocktree/go-owcdrivers v1.0.0/go.mod h1:AzbIxzzRcSszV/XwOiu83QqKuGTuWyCdCrVfGNt2bk8=
 github.com/blocktree/go-owcdrivers v1.0.4 h1:ojdUJiOD40fxuW1UrLU79RNTObtdFCMx0miwdW3T72o=
