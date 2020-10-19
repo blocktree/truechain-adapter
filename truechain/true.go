@@ -16,22 +16,22 @@
 package truechain
 
 import (
-	"github.com/blocktree/ethereum-adapter/ethereum"
-	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/quorum-adapter/quorum"
 )
 
 const (
-	Symbol    = "TRUE"
+	Symbol = "TRUE"
 )
 
 type WalletManager struct {
-	*ethereum.WalletManager
+	*quorum.WalletManager
 }
 
 func NewWalletManager() *WalletManager {
 	wm := WalletManager{}
-	wm.WalletManager = ethereum.NewWalletManager()
-	wm.Config = ethereum.NewConfig(Symbol)
+	wm.WalletManager = quorum.NewWalletManager()
+	wm.Config = quorum.NewConfig(Symbol)
 	wm.Log = log.NewOWLogger(wm.Symbol())
 	return &wm
 }

@@ -1,9 +1,10 @@
 package openwtester
 
 import (
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openw"
-	"github.com/blocktree/openwallet/openwallet"
+	"fmt"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openw"
+	"github.com/blocktree/openwallet/v2/openwallet"
 	"path/filepath"
 	"testing"
 )
@@ -44,7 +45,7 @@ func TestWalletManager_GetWalletInfo(t *testing.T) {
 
 	tm := testInitWalletManager()
 
-	wallet, err := tm.GetWalletInfo(testApp, "WHQF3H2Hqa2Pksp8vWmBDZpS7piEGVivRp")
+	wallet, err := tm.GetWalletInfo(testApp, "WCBkGX2YgKuZndqhZxEnuJMWm9w95UcMNx")
 	if err != nil {
 		log.Error("unexpected error:", err)
 		return
@@ -91,7 +92,7 @@ func TestWalletManager_GetAssetsAccountList(t *testing.T) {
 
 	tm := testInitWalletManager()
 
-	walletID := "WHQF3H2Hqa2Pksp8vWmBDZpS7piEGVivRp"
+	walletID := "WCBkGX2YgKuZndqhZxEnuJMWm9w95UcMNx"
 	list, err := tm.GetAssetsAccountList(testApp, walletID, 0, 10000000)
 	if err != nil {
 		log.Error("unexpected error:", err)
@@ -110,8 +111,10 @@ func TestWalletManager_CreateAddress(t *testing.T) {
 
 	tm := testInitWalletManager()
 
-	walletID := "WHQF3H2Hqa2Pksp8vWmBDZpS7piEGVivRp"
-	accountID := "HgRBsaiKgoVDagwezos496vqKQCh41pY44JbhW65YA8t"
+	walletID := "WCBkGX2YgKuZndqhZxEnuJMWm9w95UcMNx"
+	//accountID := "FEWHN8m8Mwey64KenQvVuZGYjErD1Sm7krsqirFe63uC"
+	accountID := "A1QQ8mLa2uGJhboZJjs1qkEt6zEGrWewfEfmnxs3tYhr"
+
 	address, err := tm.CreateAddress(testApp, walletID, accountID, 5)
 	if err != nil {
 		log.Error(err)
@@ -127,17 +130,17 @@ func TestWalletManager_GetAddressList(t *testing.T) {
 
 	tm := testInitWalletManager()
 
-	walletID := "WHQF3H2Hqa2Pksp8vWmBDZpS7piEGVivRp"
-	accountID := "HgRBsaiKgoVDagwezos496vqKQCh41pY44JbhW65YA8t"
+	walletID := "WCBkGX2YgKuZndqhZxEnuJMWm9w95UcMNx"
+	accountID := "FEWHN8m8Mwey64KenQvVuZGYjErD1Sm7krsqirFe63uC"
+	//accountID := "A1QQ8mLa2uGJhboZJjs1qkEt6zEGrWewfEfmnxs3tYhr"
 	list, err := tm.GetAddressList(testApp, walletID, accountID, 0, -1, false)
 	if err != nil {
 		log.Error("unexpected error:", err)
 		return
 	}
-	for i, w := range list {
-		log.Info("address[", i, "] :", w.Address)
+	for _, w := range list {
+		fmt.Printf("%s\n", w.Address)
 	}
-	log.Info("address count:", len(list))
 
 	tm.CloseDB(testApp)
 }

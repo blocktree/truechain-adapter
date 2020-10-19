@@ -17,10 +17,10 @@ package openwtester
 
 import (
 	"github.com/astaxie/beego/config"
-	"github.com/blocktree/openwallet/common/file"
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openw"
-	"github.com/blocktree/openwallet/openwallet"
+	"github.com/blocktree/openwallet/v2/common/file"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openw"
+	"github.com/blocktree/openwallet/v2/openwallet"
 	"path/filepath"
 	"testing"
 )
@@ -53,127 +53,55 @@ func (sub *subscriberSingle) BlockExtractDataNotify(sourceKey string, data *open
 	return nil
 }
 
+//BlockExtractSmartContractDataNotify 区块提取智能合约交易结果通知
+func (sub *subscriberSingle) BlockExtractSmartContractDataNotify(sourceKey string, data *openwallet.SmartContractReceipt) error {
+
+	log.Notice("sourceKey:", sourceKey)
+	log.Std.Notice("data.ContractTransaction: %+v", data)
+
+	for i, event := range data.Events {
+		log.Std.Notice("data.Events[%d]: %+v", i, event)
+	}
+
+	return nil
+}
+
 
 func TestSubscribeAddress_TRUE(t *testing.T) {
 
 	var (
 		endRunning = make(chan bool, 1)
 		symbol     = "TRUE"
-		accountID  = "HgRBsaiKgoVDagwezos496vqKQCh41pY44JbhW65YA8t"
-		addrs      = map[string]string{
-			"0x0bafa25466ab8e411480fcedb3117ff4d07c0271": accountID,
-		}
 	)
 
-	//GetSourceKeyByAddress 获取地址对应的数据源标识
-	scanAddressFunc := func(address string) (string, bool) {
-		key, ok := addrs[address]
-		if !ok {
-			return "", false
-		}
-		return key, true
-	}
-
-	assetsMgr, err := openw.GetAssetsAdapter(symbol)
-	if err != nil {
-		log.Error(symbol, "is not support")
-		return
-	}
-
-	//读取配置
-	absFile := filepath.Join(configFilePath, symbol+".ini")
-
-	c, err := config.NewConfig("ini", absFile)
-	if err != nil {
-		return
-	}
-	assetsMgr.LoadAssetsConfig(c)
-
-	assetsLogger := assetsMgr.GetAssetsLogger()
-	if assetsLogger != nil {
-		assetsLogger.SetLogFuncCall(true)
-	}
-
-	//log.Debug("already got scanner:", assetsMgr)
-	scanner := assetsMgr.GetBlockScanner()
-	if scanner.SupportBlockchainDAI() {
-		dbFilePath := filepath.Join("data", "db")
-		dbFileName := "blockchain.db"
-		file.MkdirAll(dbFilePath)
-		dai, err := openwallet.NewBlockchainLocal(filepath.Join(dbFilePath, dbFileName), false)
-		if err != nil {
-			log.Error("NewBlockchainLocal err: %v", err)
-			return
-		}
-
-		scanner.SetBlockchainDAI(dai)
-	}
-	//scanner.SetRescanBlockHeight(6518561)
+	scanner := testBlockScanner(symbol)
 
 	if scanner == nil {
 		log.Error(symbol, "is not support block scan")
 		return
 	}
-
-	scanner.SetBlockScanAddressFunc(scanAddressFunc)
-
-	sub := subscriberSingle{}
-	scanner.AddObserver(&sub)
-
+	scanner.SetBlockScanTargetFuncV2(testScanTargetFunc(symbol))
+	scanner.SetRescanBlockHeight(10280629)
 	scanner.Run()
 
 	<-endRunning
 }
 
-
-func TestBlockScanner_ExtractTransactionData(t *testing.T) {
+func TestBlockScanner_ExtractTransactionAndReceiptData(t *testing.T) {
 
 	var (
 		symbol = "TRUE"
-		txid   = "0xe46dfbdc5aa2ae6a1ebd8250a88784395b2c416c41f3f074b14d05863e0e010c"
-		addrs  = map[string]string{
-			"0x8721bfa24a1afff09f1d21ef907ace92014be08e": "sender",
-		}
+		txid   = "0x0462f8db1152c6f1d184fb7947e021a10bb1265758ac24d59a7bcb237bee08e6"
 	)
 
-	//GetSourceKeyByAddress 获取地址对应的数据源标识
-	scanTargetFunc := func(target openwallet.ScanTarget) (string, bool) {
-		key, ok := addrs[target.Address]
-		if !ok {
-			return "", false
-		}
-		return key, true
-	}
-
-	assetsMgr, err := openw.GetAssetsAdapter(symbol)
-	if err != nil {
-		log.Error(symbol, "is not support")
-		return
-	}
-
-	//读取配置
-	absFile := filepath.Join(configFilePath, symbol+".ini")
-
-	c, err := config.NewConfig("ini", absFile)
-	if err != nil {
-		return
-	}
-	assetsMgr.LoadAssetsConfig(c)
-
-	assetsLogger := assetsMgr.GetAssetsLogger()
-	if assetsLogger != nil {
-		assetsLogger.SetLogFuncCall(true)
-	}
-
-	//log.Debug("already got scanner:", assetsMgr)
-	scanner := assetsMgr.GetBlockScanner()
-	//scanner.SetRescanBlockHeight(6518561)
+	scanner := testBlockScanner(symbol)
 
 	if scanner == nil {
 		log.Error(symbol, "is not support block scan")
 		return
 	}
-	result, err := scanner.ExtractTransactionData(txid, scanTargetFunc)
+
+	result, contractResult, err := scanner.ExtractTransactionAndReceiptData(txid, testScanTargetFunc(symbol))
 	if err != nil {
 		t.Errorf("ExtractTransactionData unexpected error %v", err)
 		return
@@ -195,4 +123,86 @@ func TestBlockScanner_ExtractTransactionData(t *testing.T) {
 		}
 	}
 
+	for sourceKey, keyData := range contractResult {
+		log.Notice("sourceKey:", sourceKey)
+		log.Std.Notice("data.ContractTransaction: %+v", keyData)
+
+		for i, event := range keyData.Events {
+			log.Std.Notice("data.Contract[%d]: %+v", i, event.Contract)
+			log.Std.Notice("data.Events[%d]: %+v", i, event)
+		}
+	}
+}
+
+func testScanTargetFunc(symbol string) openwallet.BlockScanTargetFuncV2 {
+	var (
+		addrs  = make(map[string]openwallet.ScanTargetResult)
+		contracts   = make(map[string]openwallet.ScanTargetResult)
+	)
+
+	//添加监听的合约地址
+	contract := &openwallet.SmartContract{
+		Symbol:   symbol,
+		Address:  "0xdac17f958d2ee523a2206206994597c13d831ec7",
+		Decimals: 2,
+	}
+	contract.ContractID = openwallet.GenContractID(contract.Symbol, contract.Address)
+	//contract.SetABI(quorum.ERC20_ABI_JSON)
+	contracts[contract.Address] = openwallet.ScanTargetResult{SourceKey: contract.ContractID, Exist: true, TargetInfo: contract}
+
+	//添加监听的外部地址
+	addrs["0x0ff8d979e33412a2904a66226ff6a336d7c873db"] = openwallet.ScanTargetResult{SourceKey: "sender", Exist: true}
+	addrs["0xc97a4ed29f03fd549c4ae79086673523122d2bc5"] = openwallet.ScanTargetResult{SourceKey: "receiver", Exist: true}
+
+	scanTargetFunc := func(target openwallet.ScanTargetParam) openwallet.ScanTargetResult {
+		if target.ScanTargetType == openwallet.ScanTargetTypeContractAddress {
+			return contracts[target.ScanTarget]
+		} else if target.ScanTargetType == openwallet.ScanTargetTypeAccountAddress {
+			return addrs[target.ScanTarget]
+		}
+		return openwallet.ScanTargetResult{SourceKey: "", Exist: false, TargetInfo: nil,}
+	}
+
+	return scanTargetFunc
+}
+
+func testBlockScanner(symbol string) openwallet.BlockScanner {
+	assetsMgr, err := openw.GetAssetsAdapter(symbol)
+	if err != nil {
+		log.Error(symbol, "is not support")
+		return nil
+	}
+
+	//读取配置
+	absFile := filepath.Join(configFilePath, symbol+".ini")
+
+	c, err := config.NewConfig("ini", absFile)
+	if err != nil {
+		return nil
+	}
+	assetsMgr.LoadAssetsConfig(c)
+
+	assetsLogger := assetsMgr.GetAssetsLogger()
+	if assetsLogger != nil {
+		assetsLogger.SetLogFuncCall(true)
+	}
+
+	//log.Debug("already got scanner:", assetsMgr)
+	scanner := assetsMgr.GetBlockScanner()
+	if scanner.SupportBlockchainDAI() {
+		dbFilePath := filepath.Join("data", "db")
+		dbFileName := "blockchain.db"
+		file.MkdirAll(dbFilePath)
+		dai, err := openwallet.NewBlockchainLocal(filepath.Join(dbFilePath, dbFileName), false)
+		if err != nil {
+			log.Error("NewBlockchainLocal err: %v", err)
+			return nil
+		}
+
+		scanner.SetBlockchainDAI(dai)
+	}
+	sub := subscriberSingle{}
+	scanner.AddObserver(&sub)
+
+	return scanner
 }

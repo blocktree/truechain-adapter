@@ -17,12 +17,12 @@ package openwtester
 
 import (
 	"github.com/astaxie/beego/config"
-	"github.com/blocktree/openwallet/openw"
+	"github.com/blocktree/openwallet/v2/openw"
 	"path/filepath"
 	"testing"
 
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openwallet"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
 )
 
 func TestWalletManager_GetTransactions(t *testing.T) {
@@ -105,8 +105,8 @@ func TestWalletManager_GetTransactionByWxID(t *testing.T) {
 
 func TestWalletManager_GetAssetsAccountBalance(t *testing.T) {
 	tm := testInitWalletManager()
-	walletID := "W2WoU9mK66LA2xVkK2XK6v8tFx5bjY3MLX"
-	accountID := "3acWfDKFtfF6hC1HfQE8mq6VejRgjLZpDuo9eK1ViZBk"
+	walletID := "WCBkGX2YgKuZndqhZxEnuJMWm9w95UcMNx"
+	accountID := "FEWHN8m8Mwey64KenQvVuZGYjErD1Sm7krsqirFe63uC"
 
 	balance, err := tm.GetAssetsAccountBalance(testApp, walletID, accountID)
 	if err != nil {
@@ -119,13 +119,13 @@ func TestWalletManager_GetAssetsAccountBalance(t *testing.T) {
 func TestWalletManager_GetAssetsAccountTokenBalance(t *testing.T) {
 	tm := testInitWalletManager()
 	walletID := "WCBkGX2YgKuZndqhZxEnuJMWm9w95UcMNx"
-	accountID := "CowQhDKmxb6Jaotkb4V3oqQSb2SCgcGy8819GpGVFLP8"
-
+	accountID := "FEWHN8m8Mwey64KenQvVuZGYjErD1Sm7krsqirFe63uC"
+	//accountID := "A1QQ8mLa2uGJhboZJjs1qkEt6zEGrWewfEfmnxs3tYhr"
 	contract := openwallet.SmartContract{
-		Address:  "0x1cC3150ABc543b62A20694DC16c9E614855A2C40",
+		Address:  "",
 		Symbol:   "TRUE",
-		Name:     "OCoin",
-		Token:    "OCN",
+		Name:     "",
+		Token:    "",
 		Decimals: 18,
 	}
 
